@@ -2,14 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Nest : MonoBehaviour
+public class viewer : MonoBehaviour
 {
-    static Nest instance;
-    void Awake()
-    {
-        instance = this;
-    }
-    // Start is called before the first frame update
+    
     void Start()
     {
         

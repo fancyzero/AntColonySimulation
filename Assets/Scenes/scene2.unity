@@ -327,12 +327,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 972d24c276904244a98caf05280f0401, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  numAgents: 100
   csAgentRun: {fileID: 7200000, guid: 3d9354b5ed4053640bd5848ccf95d629, type: 3}
   csProcessMap: {fileID: 7200000, guid: 9c3967a43ffa99a408d6ec074328b382, type: 3}
   theMax: 0
   traceMap: {fileID: 0}
   processedTraceMap: {fileID: 0}
-  moveSpeed: 1
+  moveSpeed: 0.1
   sensorDist: 5
   sensorRange: 5
   turnSpeed: 0.5
