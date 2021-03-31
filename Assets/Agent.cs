@@ -73,6 +73,31 @@ public class Agent : MonoBehaviour
     {
         return Random.insideUnitCircle ;
     }
+
+    float PickRotation()
+    {
+            if ( sensorCenter > sensorLeft && sensorCenter > sensorRight )
+            {
+                return 0;
+            }
+
+            else if ( sensorRight > sensorCenter && sensorLeft > sensorCenter )
+            {
+                var ret= Random.Range(0,1);
+                if (ret == 0)
+                    ret = -1;
+                return ret;
+            }       
+            else if (sensorLeft > sensorRight)
+            {
+                return -1;
+            }
+            else if (sensorRight > sensorLeft)
+            {
+                return 1;
+            }
+            return 0;
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -91,18 +116,9 @@ public class Agent : MonoBehaviour
         if ( food == null)
         {
             Quaternion rotateFix = Quaternion.identity;
-            if ( sensorLeft > sensorCenter && sensorLeft > sensorCenter )
-            {
-                rotateFix = Quaternion.AngleAxis(-50,Vector3.back) ;
-            }
-
-            if ( sensorRight > sensorCenter && sensorRight > sensorLeft )
-            {
-                rotateFix =  Quaternion.AngleAxis(50,Vector3.back) ;
-            }            
+            rotateFix = Quaternion.AngleAxis(50*PickRotation(),Vector3.back) ;
             movingDirection =  rotateFix *movingDirection ;
-            movingDirection.Normalize();                   
-            
+            movingDirection.Normalize();                              
             SearchFood();
         }
 
@@ -110,15 +126,8 @@ public class Agent : MonoBehaviour
         {
 
             Quaternion rotateFix = Quaternion.identity;
-            if ( sensorLeft > sensorCenter && sensorLeft > sensorCenter )
-            {
-                rotateFix = Quaternion.AngleAxis(-50,Vector3.back) ;
-            }
+            rotateFix = Quaternion.AngleAxis(50*PickRotation(),Vector3.back) ;
 
-            if ( sensorRight > sensorCenter && sensorRight > sensorLeft )
-            {
-                rotateFix =  Quaternion.AngleAxis(50,Vector3.back) ;
-            }             
             movingDirection =  rotateFix *movingDirection ;
             movingDirection.Normalize();    
 
