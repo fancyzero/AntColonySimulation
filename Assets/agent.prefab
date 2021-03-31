@@ -68,7 +68,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1264778543736860164}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.42, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_Children:
   - {fileID: 6360238532225708728}
@@ -266,7 +266,7 @@ Transform:
   m_GameObject: {fileID: 3840560951510630092}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: -0.01, y: -0.626, z: 0}
-  m_LocalScale: {x: 0.12916206, y: 2.075, z: 1}
+  m_LocalScale: {x: 0.12916206, y: 1.089375, z: 1}
   m_Children: []
   m_Father: {fileID: 5130337755278185209}
   m_RootOrder: 5
@@ -347,7 +347,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6381641735910525948}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.202, z: 0}
+  m_LocalPosition: {x: 0, y: -1.766, z: 0}
   m_LocalScale: {x: 1, y: 1.8996, z: 1}
   m_Children: []
   m_Father: {fileID: 5130337755278185209}
@@ -429,8 +429,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7889044889206387965}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -0.0099999, y: -1.121, z: 0}
-  m_LocalScale: {x: 0.13776797, y: 1.5562501, z: 1}
+  m_LocalPosition: {x: -0.01, y: -1.121, z: 0}
+  m_LocalScale: {x: 0.13776797, y: 0.81703126, z: 1}
   m_Children: []
   m_Father: {fileID: 5130337755278185209}
   m_RootOrder: 3
@@ -583,7 +583,7 @@ MonoBehaviour:
   speed: 10
   wanderingStrength: 0.15
   foodSearchRadius: 8
-  traceInterval: 0.5
+  traceInterval: 0.2
   moveForce: 10
 --- !u!54 &8793606976986663278
 Rigidbody:
@@ -641,7 +641,7 @@ Transform:
   m_GameObject: {fileID: 8579674266054815594}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: -0.01, y: -0.876, z: 0}
-  m_LocalScale: {x: 0.12916206, y: 2.075, z: 1}
+  m_LocalScale: {x: 0.12916206, y: 1.089375, z: 1}
   m_Children: []
   m_Father: {fileID: 5130337755278185209}
   m_RootOrder: 2
