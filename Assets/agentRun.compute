@@ -1,0 +1,98 @@
+﻿#pragma kernel AgentRun
+
+struct Agent
+{
+    float2 pos;
+    float angle;
+};
+RWStructuredBuffer<Agent> agents;
+RWTexture2D<float> res;
+
+uint numAgents;
+
+int width;
+int height;
+float speed;
+float deltaTime;
+float sensorDist;
+int sensorRange;
+float turnSpeed;
+uint hash(uint state)
+{
+    state ^= 2747636419u;
+    state *= 2654435769u;
+    state ^= state >> 16;
+    state *= 2654435769u;
+    state ^= state >> 16;
+    state *= 2654435769u;
+    return state;
+}
+
+float sense(Agent agent, float sensorAngleOffset)
+{
+    float sensorAngle = agent.angle + sensorAngleOffset;
+    float2 sensorOffset = float2(cos(sensorAngle),sin(sensorAngle));
+    float2 sensorPos = agent.pos + sensorOffset*sensorDist;
+    float total = 0;
+    for(int x = -sensorRange; x<=sensorRange; x++)
+    {
+        for (int y = -sensorRange; y<=sensorRange; y++)
+        {
+            int2 pos = sensorPos + int2(x,y);
+            if (pos.x <0 || pos.x >= width || pos.y <0 || pos.y >= height )
+                continue;
+            total += res[pos];
+
+        }
+    }
+    return total;
+}
+
+[numthreads(32,1,1)]
+void AgentRun (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= numAgents )
+       return;
+    Agent agent = agents[id.x];
+    uint random = hash(agent.pos.y*width + agent.pos.x+hash(id.x));
+    float normalizedRandom =  (random/4294967295.0f);
+    
+    float centerScore = sense(agent,0);
+    float leftScore = sense(agent,-0.87);
+    float rightScore = sense(agent,0.87);
+
+    float randomSteering = normalizedRandom;
+    float newAngle = agent.angle;
+    if (centerScore > leftScore && centerScore > rightScore )
+    {
+        //nothing, keep moving forward
+    }
+    else if (centerScore < leftScore && centerScore < rightScore)
+    {
+        newAngle += (randomSteering-0.5)*2*turnSpeed*deltaTime;
+    }
+    else if (leftScore > rightScore)
+    {
+        newAngle -= randomSteering*turnSpeed*deltaTime;
+    }
+    else if (rightScore > leftScore)
+    {
+        newAngle += randomSteering*turnSpeed*deltaTime;
+    }
+    
+    float2 dir = float2(cos(newAngle),sin(newAngle));
+    dir = normalize(dir);
+    float2 newPos = agents[id.x].pos + dir*speed*deltaTime;
+
+    if ( newPos.x < 0 || newPos.x >= width || newPos.y <0 || newPos.y>=height)
+    {
+        newPos.x = min(width-0.01, max(0,newPos.x));
+        newPos.y = min(height-0.01, max(0,newPos.y));
+        newPos = agent.pos;
+        agents[id.x].angle =normalizedRandom*2.0f*3.1415926;
+    }
+    agents[id.x].pos = newPos;
+    agents[id.x].angle = newAngle;
+    res[int2(newPos.x, newPos.y)] = 1;
+    
+}

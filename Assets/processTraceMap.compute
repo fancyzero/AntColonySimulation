@@ -1,0 +1,38 @@
+﻿#pragma kernel ProcessTraceMap
+
+
+Texture2D<float> map;
+RWTexture2D<float> newMap;
+uint height;
+uint width;
+float decaySpeed;
+float deltaTime;
+float diffuseSpeed;
+
+[numthreads(8,8,1)]
+void ProcessTraceMap (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x <0 || id.x >= width || id.y <0 || id.y >= height )
+        return;
+
+    //diffuse
+    float total = 0;
+    float old = map[id.xy];
+    
+    for(int i = -1; i<2; i++)
+    {
+        for (int j = -1; j<2; j++)
+        {   
+            uint x = i + id.x;
+            uint y = j + id.y;
+            if (x <0 || x >= width || y <0 || y >= height )
+                continue;
+            total += map[int2(x,y)];
+            
+        }
+    }
+    float blured = total/9;   
+    float diffused = lerp(old, blured, saturate(diffuseSpeed*deltaTime));
+    float newValue = max(0, diffused - decaySpeed*deltaTime);
+    newMap[id.xy] = newValue;
+}
