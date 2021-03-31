@@ -7,27 +7,29 @@ public class Spawner : MonoBehaviour
 {
     [SerializeField]
     public GameObject agentTemplate;
-    public TraceMap searchTrace;
-    public TraceMap foodTrace;
 
     [SerializeField]
-    public GameObject traceMark;
+    public GameObject searchMark;
+    [SerializeField]
+    public GameObject foodMark;    
     public int count;
+    public float angentPerSecond;
+    float startTime = 0.0f;
+    int spawned = 0;
     // Start is called before the first frame update
-    void Start()
+    private void Start() 
     {
-        searchTrace = new TraceMap(100,new Vector2(-50,-50),new Vector2(50,50));
-        foodTrace = new TraceMap(100,new Vector2(-50,-50),new Vector2(50,50));
-        for ( int i =0; i < count  ; i++)
+        startTime = Time.fixedTime;
+    }
+    void Update()
+    {
+        while (spawned < (Time.fixedTime-startTime)*angentPerSecond  && spawned < count)
         {
-            var newAgent = Instantiate(agentTemplate);
+            var newAgent = Instantiate(agentTemplate, transform.position, Quaternion.identity);
             newAgent.GetComponent<Agent>().spawner = this;
+            spawned ++;
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }

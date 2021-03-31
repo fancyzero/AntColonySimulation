@@ -12,8 +12,14 @@ public class Food : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+
+    public void Taken()
     {
-        
+        var cs = GetComponents<Collider>();
+        foreach( var c in cs )
+        {
+            c.enabled = false;
+        }
     }
+
 }
