@@ -38,19 +38,22 @@ public class CSTest : MonoBehaviour
     {
         traceMap = new RenderTexture(size,size,0,RenderTextureFormat.RFloat,RenderTextureReadWrite.Linear);
         traceMap.enableRandomWrite = true;
-        traceMap.filterMode= FilterMode.Point;
+        // traceMap.filterMode= FilterMode.Point;
         traceMap.Create(); 
 
         processedTraceMap = new RenderTexture(size,size,0,RenderTextureFormat.RFloat,RenderTextureReadWrite.Linear);
         processedTraceMap.enableRandomWrite = true;
-        processedTraceMap.filterMode= FilterMode.Point;
+        // processedTraceMap.filterMode= FilterMode.Point;
         processedTraceMap.Create(); 
 
         
         List<AgentCS> agents=new List<AgentCS>();
         for ( int i = 0; i < numAgents ; i++)
         {
-            agents.Add(new AgentCS(Random.insideUnitCircle*(size/4)+new Vector2(size/2,size/2),Random.Range(0,3.1415f*2.0f) ));
+            
+            var initialDir = Random.insideUnitCircle;
+            var initialAngle = Mathf.Atan2(-initialDir.y, -initialDir.x);
+            agents.Add(new AgentCS(initialDir*(size*0.4f)+new Vector2(size/2,size/2), initialAngle ));
         }
         buffer = new ComputeBuffer(agents.Count,3*4);
         buffer.SetData<AgentCS>(agents);
@@ -83,8 +86,9 @@ public class CSTest : MonoBehaviour
         csProcessMap.SetTexture(0,"map",traceMap,0);
         csProcessMap.SetTexture(0,"newMap",processedTraceMap,0);
 
-        csAgentRun.SetFloat("deltaTime", Time.deltaTime);
-        csProcessMap.SetFloat("deltaTime", Time.deltaTime);
+        float deltaTime = 0.005f;
+        csAgentRun.SetFloat("deltaTime", deltaTime);
+        csProcessMap.SetFloat("deltaTime", deltaTime);
 
         csProcessMap.SetFloat("decaySpeed",decaySpeed);
         csProcessMap.SetFloat("diffuseSpeed",diffuseSpeed);
@@ -94,7 +98,7 @@ public class CSTest : MonoBehaviour
         csAgentRun.SetFloat("turnSpeed",turnSpeed);
         csAgentRun.SetFloat("speed",moveSpeed);        
 
-        csAgentRun.Dispatch(0,size/32,size,1);
+        csAgentRun.Dispatch(0,size,size,1);
         csProcessMap.Dispatch(0,size/8,size/8,1);
 
         var tmp = traceMap;

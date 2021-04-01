@@ -3,6 +3,7 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Gradient ("Gradient", 2D) = "white" {}
     }
     SubShader
     {
@@ -33,6 +34,7 @@
             };
 
             sampler2D _MainTex;
+            sampler2D _Gradient;
             float4 _MainTex_ST;
 
             v2f vert (appdata v)
@@ -48,7 +50,8 @@
             {
 
                 // sample the texture
-                 fixed4 col = tex2D(_MainTex, i.uv).xxxx;
+                float value = tex2D(_MainTex, i.uv).xxxx;
+                float4 col = tex2D(_Gradient, float2(value,0));
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

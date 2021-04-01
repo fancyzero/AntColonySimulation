@@ -32,7 +32,7 @@ float sense(Agent agent, float sensorAngleOffset)
 {
     float sensorAngle = agent.angle + sensorAngleOffset;
     float2 sensorOffset = float2(cos(sensorAngle),sin(sensorAngle));
-    float2 sensorPos = agent.pos + sensorOffset*sensorDist;
+    int2 sensorPos = agent.pos + sensorOffset*sensorDist;
     float total = 0;
     for(int x = -sensorRange; x<=sensorRange; x++)
     {
@@ -52,16 +52,16 @@ float sense(Agent agent, float sensorAngleOffset)
 void AgentRun (uint3 id : SV_DispatchThreadID)
 {
     if (id.x >= numAgents )
-       return;
+        return;
     Agent agent = agents[id.x];
     uint random = hash(agent.pos.y*width + agent.pos.x+hash(id.x));
-    float normalizedRandom =  (random/4294967295.0f);
+    float random01 =  (random/4294967295.0f);
     
     float centerScore = sense(agent,0);
     float leftScore = sense(agent,-0.87);
     float rightScore = sense(agent,0.87);
 
-    float randomSteering = normalizedRandom;
+    float randomSteering = random01;
     float newAngle = agent.angle;
     if (centerScore > leftScore && centerScore > rightScore )
     {
@@ -81,15 +81,13 @@ void AgentRun (uint3 id : SV_DispatchThreadID)
     }
     
     float2 dir = float2(cos(newAngle),sin(newAngle));
-    dir = normalize(dir);
     float2 newPos = agents[id.x].pos + dir*speed*deltaTime;
 
     if ( newPos.x < 0 || newPos.x >= width || newPos.y <0 || newPos.y>=height)
     {
-        newPos.x = min(width-0.01, max(0,newPos.x));
-        newPos.y = min(height-0.01, max(0,newPos.y));
-        newPos = agent.pos;
-        agents[id.x].angle =normalizedRandom*2.0f*3.1415926;
+        newPos.x = min(width-0.1, max(0,newPos.x));
+        newPos.y = min(height-0.1, max(0,newPos.y));
+        newAngle = random01*2.0f*3.1415926;
     }
     agents[id.x].pos = newPos;
     agents[id.x].angle = newAngle;
