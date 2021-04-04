@@ -23,9 +23,10 @@ public class Spawner : MonoBehaviour
     }
     void Update()
     {
+        var fixRot = Quaternion.AngleAxis(90, Vector3.right);
         while (spawned < (Time.fixedTime-startTime)*angentPerSecond  && spawned < count)
         {
-            var newAgent = Instantiate(agentTemplate, transform.position, Quaternion.identity);
+            var newAgent = Instantiate(agentTemplate, transform.position, Quaternion.LookRotation(Random.insideUnitCircle,Vector3.back)*fixRot);
             newAgent.GetComponent<Agent>().spawner = this;
             spawned ++;
         }

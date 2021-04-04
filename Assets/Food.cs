@@ -15,7 +15,7 @@ public class Food : MonoBehaviour
 
     public void Taken()
     {
-        var cs = GetComponents<Collider>();
+        var cs = GetComponents<Collider2D>();
         foreach( var c in cs )
         {
             c.enabled = false;

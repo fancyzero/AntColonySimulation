@@ -23,6 +23,22 @@ Material:
         m_Texture: {fileID: 2800000, guid: 096ab7a80405bb74bba1cb8351c261a5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _GradientA:
+        m_Texture: {fileID: 2800000, guid: 805917b8b3eb0af4a95245f9d4d661aa, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GradientB:
+        m_Texture: {fileID: 2800000, guid: 7459894a3f144ed43aab4492289d1ee1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GradientG:
+        m_Texture: {fileID: 2800000, guid: 49bf6821d016db94f83584fd306c1fde, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GradientR:
+        m_Texture: {fileID: 2800000, guid: 5e5ed89c864b1f040b180533d88fc76b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}

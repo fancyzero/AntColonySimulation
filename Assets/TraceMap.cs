@@ -25,7 +25,7 @@ public class Cell
 
 public class TraceMap 
 {
-    public float maxLife;
+    public float maxLife=1000;
     List<Cell> cells;
     public Vector2 tl;
     public Vector2 rb;
@@ -47,22 +47,26 @@ public class TraceMap
     }
     public void AddMark(Vector2 pos)
     {
-        pos -= tl;
-        pos /=cellSize; 
-        int x = (int)(pos.x);
-        int y = (int)(pos.y);
+        var gridPos = pos;
+        gridPos -= tl;
+        gridPos /=cellSize; 
+        int x = (int)(gridPos.x);
+        int y = (int)(gridPos.y);
         if( x<0 || x >=size ||y<0 ||y >=size )
             return;
+        
         cells[x+y*size].points.Add(new Marker(pos));
     }
     public List<Marker> GetMarks( Vector2 pos,float r)
     {
+        var gridPos = pos;
         var r2= r*r ;
         List<Marker> ret = new List<Marker>();
-        pos -= tl;
-        pos /=cellSize; 
-        int x = (int)(pos.x);
-        int y = (int)(pos.y);
+        gridPos -= tl;
+        gridPos /=cellSize; 
+        int x = (int)(gridPos.x);
+        int y = (int)(gridPos.y);
+        
         for ( int i = -1; i < 2; i++)
             for ( int j = -1; j < 2; j++)
             {
@@ -94,6 +98,8 @@ public class TraceMap
             c.points.RemoveAll((x) => { return Time.fixedTime - x.createdTime >= maxLife; });
             newCount += c.points.Count;
         }
-        Debug.Log(string.Format("{0} {1}",oldCount, newCount));
+
+        Debug.LogFormat("old points: {0}, new Points {1}", oldCount, newCount);
+        
     }
 }

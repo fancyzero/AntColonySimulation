@@ -1,12 +1,9 @@
-﻿Shader "Unlit/NewUnlitShader"
+Shader "Unlit/MapShader"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        _GradientR ("GradientR", 2D) = "white" {}
-        _GradientG ("GradientG", 2D) = "white" {}
-        _GradientB ("GradientB", 2D) = "white" {}
-        _GradientA ("GradientA", 2D) = "white" {}
+        
+        NumGrids ("Num Grids",float)=0
     }
     SubShader
     {
@@ -36,31 +33,26 @@
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _MainTex;
-            sampler2D _GradientR;
-            sampler2D _GradientG;
-            sampler2D _GradientB;            
-            sampler2D _GradientA;            
-            float4 _MainTex_ST;
+            float NumGrids;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
-
+                UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float4 value = tex2D(_MainTex, i.uv);
-                float4 R = tex2D(_GradientR, float2(value.r,0));
-                float4 G = tex2D(_GradientG, float2(value.g,0));
-                float4 B = tex2D(_GradientB, float2(value.b,0));
-                float4 A = tex2D(_GradientA, float2(value.a,0));
-
-                return value;//(R*value.r+G*value.g+B*value.b+A*value.a)/(dot(value,float4(1,1,1,1)));
+                // sample the texture
+                float4 value = float4(smoothstep(0.8,1,1-abs(sin(i.uv*NumGrids*3.1415926))),0,0);
+                value = saturate(value);
+                value+=float4(.5,.5,.5,0);
+                // apply fog
+                
+                return value;
             }
             ENDCG
         }

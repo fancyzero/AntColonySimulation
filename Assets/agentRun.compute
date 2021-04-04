@@ -1,12 +1,13 @@
-﻿#pragma kernel AgentRun
+#pragma kernel AgentRun
 
 struct Agent
 {
     float2 pos;
     float angle;
+    float4  specie;
 };
 RWStructuredBuffer<Agent> agents;
-RWTexture2D<float> res;
+RWTexture2D<float4> res;
 
 uint numAgents;
 
@@ -17,6 +18,9 @@ float deltaTime;
 float sensorDist;
 int sensorRange;
 float turnSpeed;
+float trailWeight;
+float sensorAngle;
+float sensorBaseAngle;
 uint hash(uint state)
 {
     state ^= 2747636419u;
@@ -30,10 +34,11 @@ uint hash(uint state)
 
 float sense(Agent agent, float sensorAngleOffset)
 {
-    float sensorAngle = agent.angle + sensorAngleOffset;
-    float2 sensorOffset = float2(cos(sensorAngle),sin(sensorAngle));
+    sensorAngleOffset+=sensorBaseAngle;
+    float angle = agent.angle + sensorAngleOffset;
+    float2 sensorOffset = float2(cos(angle),sin(angle));
     int2 sensorPos = agent.pos + sensorOffset*sensorDist;
-    float total = 0;
+    float4 total = 0;
     for(int x = -sensorRange; x<=sensorRange; x++)
     {
         for (int y = -sensorRange; y<=sensorRange; y++)
@@ -45,7 +50,8 @@ float sense(Agent agent, float sensorAngleOffset)
 
         }
     }
-    return total;
+    return dot(total , agent.specie);
+    //return total.x;
 }
 
 [numthreads(32,1,1)]
@@ -57,9 +63,9 @@ void AgentRun (uint3 id : SV_DispatchThreadID)
     uint random = hash(agent.pos.y*width + agent.pos.x+hash(id.x));
     float random01 =  (random/4294967295.0f);
     
-    float centerScore = sense(agent,0);
-    float leftScore = sense(agent,-0.87);
-    float rightScore = sense(agent,0.87);
+    float centerScore =sense(agent,0);
+    float leftScore = sense(agent,-sensorAngle*0.01745);
+    float rightScore = sense(agent,sensorAngle*0.01745);
 
     float randomSteering = random01;
     float newAngle = agent.angle;
@@ -91,6 +97,6 @@ void AgentRun (uint3 id : SV_DispatchThreadID)
     }
     agents[id.x].pos = newPos;
     agents[id.x].angle = newAngle;
-    res[int2(newPos.x, newPos.y)] = 1;
+    res[int2(newPos.x, newPos.y)] = saturate(trailWeight* deltaTime*saturate(agents[id.x].specie));
     
 }

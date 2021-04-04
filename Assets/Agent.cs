@@ -6,46 +6,68 @@ using UnityEngine;
     [System.Serializable]
 public class Agent : MonoBehaviour
 {  
-    public SphereCollider centerSensor;
-    public SphereCollider leftSensor;
-    public SphereCollider rightSensor;
     public Spawner spawner;
-    public float speed = 1;
     public float wanderingStrength = 0;
     public float foodSearchRadius = 4;
-
     float nextTimeToAddTrace = 0;
     public float traceInterval = 0.2f;
-    Vector2 movingDirection = new Vector2(0,0);
-    public float moveForce = 3;
+    Vector2 targetDirection ;
+    Vector2 velocity;
+    public float speed = 3;
+    public float rotateSpeed=3;
     Food food;
+    public float sensorAngle;
+    public float sensorDistance;
+    public float sensorRange;
 
+    public UnityEngine.UI.Text dbgText;
     float sensorLeft = 0;
     float sensorRight = 0;
     float sensorCenter = 0;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        targetDirection = Random.insideUnitCircle.normalized;        
     }
 
+    private void OnDrawGizmosSelected() 
+    {
+
+        var sensorRad = (sensorAngle) / 180 * Mathf.PI;
+        
+        Vector2 leftSensorPos = transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(sensorRad), Mathf.Sin(sensorRad),0));
+        Vector2 RightSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(-sensorRad), Mathf.Sin(-sensorRad),0));
+        Vector2 CenterSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(0), Mathf.Sin(0),0));
+
+        Gizmos.DrawWireSphere(leftSensorPos, sensorRange);
+        Gizmos.DrawWireSphere(RightSensorPos, sensorRange);
+        Gizmos.DrawWireSphere(CenterSensorPos, sensorRange);
+
+    }
 
     void Sense()
     {
         var p = transform.position;
-        var layerMask = LayerMask.GetMask("foodMark","searchMark");
+        // var layerMask = LayerMask.GetMask("foodMark","searchMark");
 
         TraceMap map = null;
         if (food == null)
         {
             map = Map.instance.foodMarks;
-        }
+        }   
         else
             map = Map.instance.homeMarks;
 
-        List<Marker> leftMarks = map.GetMarks(leftSensor.transform.position,leftSensor.radius);
-        List<Marker> rightMarks = map.GetMarks(rightSensor.transform.position,rightSensor.radius);
-        List<Marker> centerMarks = map.GetMarks(centerSensor.transform.position,centerSensor.radius);
+        var sensorRad = (sensorAngle) / 180 * Mathf.PI;
+        
+        Vector2 leftSensorPos = transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(sensorRad), Mathf.Sin(sensorRad),0));
+        Vector2 RightSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(-sensorRad), Mathf.Sin(-sensorRad),0));
+        Vector2 CenterSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(0), Mathf.Sin(0),0));
+
+        List<Marker> leftMarks = map.GetMarks(leftSensorPos,sensorRange);
+        List<Marker> rightMarks = map.GetMarks(RightSensorPos,sensorRange);
+        List<Marker> centerMarks = map.GetMarks(CenterSensorPos,sensorRange);
 
 
 
@@ -67,7 +89,6 @@ public class Agent : MonoBehaviour
         {
             sensorCenter += 1.0f;///(m.position - p2d).sqrMagnitude;
         }        
-        
     }
     Vector2 makeRandomDirection(Vector2 startWith)
     {
@@ -90,144 +111,126 @@ public class Agent : MonoBehaviour
             }       
             else if (sensorLeft > sensorRight)
             {
-                return -1;
+                return 1;
             }
             else if (sensorRight > sensorLeft)
             {
-                return 1;
+                return -1;
             }
             return 0;
     }
+
+    Quaternion MakeRotation(float angle)
+    {
+        return Quaternion.Euler(0,0,angle);
+    }
+    
     // Update is called once per frame
     void FixedUpdate()
     {
-
+        
         Sense();
+        // if (food != null)
+        //     dbgText.text = string.Format("L:{0} C:{1} R:{2}",sensorLeft,sensorCenter,sensorRight);
+        var steering = PickRotation();
+        
 
+        if (steering > 0)
+            targetDirection = Quaternion.Euler(0,0,sensorAngle)* transform.right;
+        else if (steering < 0 )
+            targetDirection =Quaternion.Euler(0,0,-sensorAngle)* transform.right;
+        else
+            targetDirection = transform.right;
 
-        var p = this.GetComponent<Transform>().position;
-
-        if (spawner == null)
-            return;
-
-        movingDirection = (movingDirection +  Random.insideUnitCircle*wanderingStrength);
-        movingDirection.Normalize();      
-
-        if ( food == null)
+        // // add noise to the direction
+        targetDirection = (targetDirection+Random.insideUnitCircle* wanderingStrength).normalized ;
+        
+        
+        if (food != null) //return to colony
         {
-            Quaternion rotateFix = Quaternion.identity;
-            rotateFix = Quaternion.AngleAxis(50*PickRotation(),Vector3.back) ;
-            movingDirection =  rotateFix *movingDirection ;
-            movingDirection.Normalize();                              
-            SearchFood();
-        }
-
-        if (food != null) //return home
-        {
-
-            Quaternion rotateFix = Quaternion.identity;
-            rotateFix = Quaternion.AngleAxis(50*PickRotation(),Vector3.back) ;
-
-            movingDirection =  rotateFix *movingDirection ;
-            movingDirection.Normalize();    
-
-            food.transform.position = transform.position + transform.up*1.0f;
-            var hives = Physics.OverlapSphere(transform.position, 8,LayerMask.GetMask("hive"));
-            if ( hives != null  && hives.Length > 0)
-            {
-                movingDirection = (hives[0].transform.position - transform.position).normalized;
-            }
+                food.transform.position = transform.position + transform.right*3.0f;
+                var colony = Physics2D.OverlapCircle(transform.position, 80,LayerMask.GetMask("colony"));
+                if ( colony != null)
+                {
+                    var diff = colony.transform.position - transform.position;
+                    targetDirection = diff.normalized;
+                }
         }
 
         if (Time.fixedTime > nextTimeToAddTrace)
         {
             if (food == null)
             {
-                Map.instance.homeMarks.AddMark( p);
-               // Instantiate(spawner.searchMark, p, Quaternion.identity);
+                Map.instance.homeMarks.AddMark( transform.position);
+                //Instantiate(spawner.searchMark,transform.position, Quaternion.identity);
             }
             else
             {
-                Map.instance.foodMarks.AddMark( p);
-               // Instantiate(spawner.foodMark, p, Quaternion.identity);
+                Map.instance.foodMarks.AddMark( transform.position);
+                //Instantiate(spawner.foodMark, transform.position, Quaternion.identity);
             }
             nextTimeToAddTrace = traceInterval + nextTimeToAddTrace;
         }
 
-        var rot = Quaternion.LookRotation(new Vector3(movingDirection.x, movingDirection.y,0).normalized , Vector3.back);
-        var fixRot = Quaternion.AngleAxis(90, Vector3.right);
-        rot  = rot*fixRot;
-        //p = p + new Vector3(movingDirection.x, movingDirection.y,0)*Time.fixedDeltaTime*speed;
-        GetComponent<Rigidbody>().AddForce( movingDirection*moveForce, ForceMode.Force );
 
-        this.GetComponent<Transform>().SetPositionAndRotation( p, rot);    
+
+        if ( food == null)
+            SearchFood();
+        
 
         if (food != null)
         {
-            if ((transform.position - Vector3.zero).magnitude < 1)
+            if ((transform.position - Vector3.zero).magnitude < 50)
             {
-                Destroy(food);
+                Destroy(food.gameObject);
                 food = null;
-                movingDirection = Quaternion.AngleAxis(180,Vector3.back) * movingDirection;
             }
         }
 
-    }
+        var newPos = transform.position + (Vector3)(velocity * Time.fixedDeltaTime);
+        if (newPos.x <-512 || newPos.x > 512 ||
+            newPos.y <-512 || newPos.y > 512 )
+            {
+                newPos = transform.position;
+                targetDirection = (-transform.position).normalized;
+                velocity = targetDirection*speed;
+            }        
 
+
+        Vector2 targetVelocity = targetDirection * speed;
+        Vector2 targetSteeringForce = (targetVelocity - velocity)*rotateSpeed;
+        Vector2 acceleraton = Vector2.ClampMagnitude(targetSteeringForce,rotateSpeed);
+
+        velocity = Vector2.ClampMagnitude(velocity+acceleraton*Time.fixedDeltaTime,speed);
+
+
+        transform.SetPositionAndRotation(newPos,Quaternion.Euler(0,0,Mathf.Atan2(velocity.y,velocity.x)*Mathf.Rad2Deg));
+
+        
+    }
+    public float slowDownAngle = 90;
     Food GetClosestFood()
     {
-        var foods = Physics.OverlapSphere(transform.position,foodSearchRadius, LayerMask.GetMask("food"));
-        float minDist = 99999;
-        Food minFood = null;
-        foreach ( var f in foods)
-        {
-            if ( f.GetComponent<Food>() == null)
-                continue;
-            float d = (f.transform.position-transform.position).magnitude;
-            if ( d < minDist)
-            {
-                minDist = d;
-                minFood = f.GetComponent<Food>();
-            }
-        }
-        return minFood;        
+        var food = Physics2D.OverlapCircle(transform.position,foodSearchRadius, LayerMask.GetMask("food"));
+        if (food != null)
+            return food.GetComponent<Food>();
+        else
+        return null;
     }
 
     void SearchFood()
     {
-        Food minFood = GetClosestFood();
-        if (minFood == null)
+        Food newFood = GetClosestFood();
+        if (newFood == null)
             return;
-        var foodDir = (minFood.GetComponent<Transform>().position -  transform.position);
-        foodDir.z = 0;
-        if (minFood != null && foodDir.magnitude < foodSearchRadius)
+        var foodDir = (newFood.GetComponent<Transform>().position -  transform.position);
+        targetDirection = foodDir.normalized;
+        if (( newFood.transform.position - transform.position).magnitude < 10)
         {
-            var v = foodDir.normalized;
-            movingDirection =new Vector2 (v.x, v.y);
-
-            if ( foodDir.magnitude < 0.5f)
-            {
-                food = minFood;
-                Food.allFoods.Remove(food);
-                food.Taken();
-                movingDirection = Quaternion.AngleAxis(180,Vector3.back) * movingDirection;
-            }            
-        }
-
-
-    }
-
-    void OnCollisionEnter(Collision other) 
-    {
-        List<ContactPoint> contactPoints = new List<ContactPoint>();
-        other.GetContacts(contactPoints);
-        if (contactPoints.Count > 0)
-        {
-            foreach ( var cp in contactPoints)
-            {
-                movingDirection = cp.normal;
-                break;
-            }
+            food = newFood;
+            food.Taken();
+            targetDirection = -transform.right ;
+            velocity = -transform.right *speed;
         }
     }
 

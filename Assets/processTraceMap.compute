@@ -1,13 +1,19 @@
 ﻿#pragma kernel ProcessTraceMap
 
 
-Texture2D<float> map;
-RWTexture2D<float> newMap;
+Texture2D<float4> map;
+RWTexture2D<float4> newMap;
 uint height;
 uint width;
 float decaySpeed;
 float deltaTime;
 float diffuseSpeed;
+
+
+float normpdf(in float x, in float sigma)
+{
+	return 0.39894*exp(-0.5*x*x/(sigma*sigma))/sigma;
+}
 
 [numthreads(8,8,1)]
 void ProcessTraceMap (uint3 id : SV_DispatchThreadID)
@@ -16,8 +22,8 @@ void ProcessTraceMap (uint3 id : SV_DispatchThreadID)
         return;
 
     //diffuse
-    float total = 0;
-    float old = map[id.xy];
+    float4 total = 0;
+    float4 old = map[id.xy];
     
     for(int i = -1; i<2; i++)
     {
@@ -31,8 +37,40 @@ void ProcessTraceMap (uint3 id : SV_DispatchThreadID)
             
         }
     }
-    float blured = total/9;   
-    float diffused = lerp(old, blured, saturate(diffuseSpeed*deltaTime));
-    float newValue = max(0, diffused - decaySpeed*deltaTime);
+    float4 blured = total/9;   
+
+// const int mSize = 11;
+//     const int kSize = (mSize-1)/2;
+//     float kernel[mSize];
+//     float4 final_colour = float4(0,0,0,0);
+		
+//     //create the 1-D kernel
+//     float sigma = 1.0;
+//     float Z = 0.0;
+//     for (int j = 0; j <= kSize; ++j)
+//     {
+//         kernel[kSize+j] = kernel[kSize-j] = normpdf(float(j), sigma);
+//     }
+    
+//     //get the normalization factor (as the gaussian has been clamped)
+//     for (int k = 0; k < mSize; ++k)
+//     {
+//         Z += kernel[k];
+//     }
+    
+//     //read out the texels
+//     for (int i=-kSize; i <= kSize; ++i)
+//     {
+//         for (int j=-kSize; j <= kSize; ++j)
+//         {
+//             final_colour += kernel[kSize+j]*kernel[kSize+i]*map[id.xy+int2(i,j)];
+
+//         }
+//     }
+    
+    
+//     float4 blured = (final_colour/(Z*Z));    
+    float4 diffused = lerp(old, blured, saturate(diffuseSpeed*deltaTime));
+    float4 newValue = max(0, diffused - decaySpeed*deltaTime);
     newMap[id.xy] = newValue;
 }
