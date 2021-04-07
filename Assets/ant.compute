@@ -1,0 +1,35 @@
+#pragma kernel AgentRun
+
+struct Agent
+{
+    float2 pos;
+    float hasFood;
+
+};
+RWStructuredBuffer<Agent> agents;
+RWTexture2D<float> map;
+
+uint numAgents;
+float needFood;
+int width;
+int height;
+
+[numthreads(32,1,1)]
+void AgentRun (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= numAgents )
+        return;
+    Agent agent = agents[id.x];
+    float2 pos = agent.pos;
+
+    if ( agent.x < 0 || agent.x >= width || agent.y <0 || agent.y>=height)
+    {
+        newPos.x = min(width-0.1, max(0,newPos.x));
+        newPos.y = min(height-0.1, max(0,newPos.y));
+        newAngle = random01*2.0f*3.1415926;
+    }
+    agents[id.x].pos = newPos;
+    agents[id.x].angle = newAngle;
+    res[int2(newPos.x, newPos.y)] = saturate(trailWeight* deltaTime*saturate(agents[id.x].specie));
+    
+}

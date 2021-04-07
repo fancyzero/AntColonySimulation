@@ -395,6 +395,8 @@ MonoBehaviour:
   diffuseSpeed: 10
   sensorAngle: 60
   sensorBaseAngle: 0
+  species: 1
+  simulationDeltaTime: 0.005
   size: 1024
 --- !u!4 &785520355
 Transform:
@@ -567,6 +569,8 @@ MonoBehaviour:
   diffuseSpeed: 200
   sensorAngle: 60
   sensorBaseAngle: 0
+  species: 1
+  simulationDeltaTime: 0.005
   size: 2048
 --- !u!4 &1612981810
 Transform:
@@ -628,6 +632,8 @@ MonoBehaviour:
   diffuseSpeed: 8.333333
   sensorAngle: 60
   sensorBaseAngle: 0
+  species: 1
+  simulationDeltaTime: 0.005
   size: 1024
 --- !u!4 &1677449862
 Transform:

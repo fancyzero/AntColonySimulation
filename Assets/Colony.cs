@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class Spawner : MonoBehaviour
+public class Colony : MonoBehaviour
 {
     [SerializeField]
     public GameObject agentTemplate;
@@ -16,7 +16,13 @@ public class Spawner : MonoBehaviour
     public float angentPerSecond;
     float startTime = 0.0f;
     int spawned = 0;
+    public List<Agent> ants = new List<Agent>();
+    public static Colony instance;
     // Start is called before the first frame update
+    private void Awake()
+    {
+        instance = this;
+    }
     private void Start() 
     {
         startTime = Time.fixedTime;
@@ -27,8 +33,7 @@ public class Spawner : MonoBehaviour
         while (spawned < (Time.fixedTime-startTime)*angentPerSecond  && spawned < count)
         {
             var newAgent = Instantiate(agentTemplate, transform.position, Quaternion.LookRotation(Random.insideUnitCircle,Vector3.back)*fixRot);
-            newAgent.GetComponent<Agent>().spawner = this;
-            spawned ++;
+            ants.Add(newAgent.GetComponent<Agent>());
         }
     }
 

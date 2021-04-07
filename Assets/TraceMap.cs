@@ -14,38 +14,38 @@ public class Marker
     public float createdTime;
     public GameObject gameObject;
 }
-public class Cell
-{
-    public Cell()
-    {
-        points = new List<Marker>();
-    }
-    public List<Marker> points;
-}
 
-public class TraceMap 
+[System.Serializable]
+public class TraceMap
 {
-    public float maxLife=1000;
-    List<Cell> cells;
+    public float decaySpeed=1;
+    Color[] values;
     public Vector2 tl;
     public Vector2 rb;
     float cellSize;
-    public int size = 100;
-
-    public TraceMap(Vector2 tl, Vector2 rb ,int size) 
+    public int size = 256;
+    public RenderTexture texture;
+    public ComputeShader computeShader;
+    public ComputeBuffer buffer;
+    public TraceMap( Vector2 tl, Vector2 rb ,int size, ComputeShader computeShader) 
     {
         this.tl = tl;
         this.size = size;
         this.rb = rb;
-        cells = new List<Cell>(size*size);
-        for ( int i =0; i < size*size; i++)
-        {
-            cells.Add(new Cell());
-        }
-
+        values  = new Color[size*size];
         cellSize = (rb.x - tl.x)/size;
+        texture = new RenderTexture(size,size,0,RenderTextureFormat.ARGBFloat,RenderTextureReadWrite.Linear);
+        texture.enableRandomWrite = true;
+        texture.filterMode= FilterMode.Point;
+        texture.Create();     
+
+        buffer = new ComputeBuffer(Colony.instance.ants.Count, 3*4 );
+        this.computeShader = computeShader;
+        computeShader.SetTexture(0,"map", texture);
+        computeShader.SetBuffer(0,"ants", buffer);
+        
     }
-    public void AddMark(Vector2 pos)
+    public void AddMark(Vector2 pos, float value)
     {
         var gridPos = pos;
         gridPos -= tl;
@@ -53,34 +53,30 @@ public class TraceMap
         int x = (int)(gridPos.x);
         int y = (int)(gridPos.y);
         if( x<0 || x >=size ||y<0 ||y >=size )
-            return;
+            return; 
         
-        cells[x+y*size].points.Add(new Marker(pos));
+        values[x+y*size].r += value;
+        if(values[x+y*size].r>4)
+            values[x+y*size].r=4;
     }
-    public List<Marker> GetMarks( Vector2 pos,float r)
+    public float GetMarks( Vector2 pos,int range)
     {
         var gridPos = pos;
-        var r2= r*r ;
-        List<Marker> ret = new List<Marker>();
+        float result = 0;
+
         gridPos -= tl;
         gridPos /=cellSize; 
         int x = (int)(gridPos.x);
         int y = (int)(gridPos.y);
         
-        for ( int i = -1; i < 2; i++)
-            for ( int j = -1; j < 2; j++)
+        for ( int i = -range; i <= range; i++)
+            for ( int j = -range; j <= range; j++)
             {
                 if( x+i<0 || x+i >=size ||y+j<0 ||y+j >=size )
                     continue;
-                foreach( var p in cells[(x+i)+(y+j)*size].points)
-                {
-                    if ( (p.position - pos).SqrMagnitude() <= r2)
-                    {
-                        ret.Add(p);
-                    }
-                }
+                result += values[(x+i)+(y+j)*size].r;
             }
-        return ret;
+        return result;
     }
 
     void Clean()
@@ -88,18 +84,15 @@ public class TraceMap
         
     }
 
-    public void FixedUpdate()
+    public void Update()
     {
-        int oldCount = 0;
-        int newCount = 0;
-        foreach( var c in cells )
+        List<Ant> ants = new List<Ant>();
+        foreach ( var i in Colony.instance.ants)
         {
-            oldCount += c.points.Count;
-            c.points.RemoveAll((x) => { return Time.fixedTime - x.createdTime >= maxLife; });
-            newCount += c.points.Count;
+            ants.Add( new Ant(i.transform.position,i.hasFood()));
         }
-
-        Debug.LogFormat("old points: {0}, new Points {1}", oldCount, newCount);
-        
+        //update buffer
+        buffer.SetData(ants);
+        computeShader.Dispatch(0,ants.Count/32,1,1);
     }
 }

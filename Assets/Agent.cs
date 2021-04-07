@@ -6,7 +6,6 @@ using UnityEngine;
     [System.Serializable]
 public class Agent : MonoBehaviour
 {  
-    public Spawner spawner;
     public float wanderingStrength = 0;
     public float foodSearchRadius = 4;
     float nextTimeToAddTrace = 0;
@@ -18,12 +17,21 @@ public class Agent : MonoBehaviour
     Food food;
     public float sensorAngle;
     public float sensorDistance;
-    public float sensorRange;
+    public int sensorRange;
 
     public UnityEngine.UI.Text dbgText;
     float sensorLeft = 0;
     float sensorRight = 0;
     float sensorCenter = 0;
+
+    public float traceWeight = 1;
+    public float hasFood()
+    {
+        if (food == null)
+            return 0;
+        else
+            return 1.0f;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -59,36 +67,15 @@ public class Agent : MonoBehaviour
         else
             map = Map.instance.homeMarks;
 
-        var sensorRad = (sensorAngle) / 180 * Mathf.PI;
+        var sensorRad = sensorAngle*Mathf.Deg2Rad;
         
         Vector2 leftSensorPos = transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(sensorRad), Mathf.Sin(sensorRad),0));
         Vector2 RightSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(-sensorRad), Mathf.Sin(-sensorRad),0));
         Vector2 CenterSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(0), Mathf.Sin(0),0));
 
-        List<Marker> leftMarks = map.GetMarks(leftSensorPos,sensorRange);
-        List<Marker> rightMarks = map.GetMarks(RightSensorPos,sensorRange);
-        List<Marker> centerMarks = map.GetMarks(CenterSensorPos,sensorRange);
-
-
-
-        sensorLeft = 0;
-        sensorRight = 0;
-        sensorCenter = 0;
-
-        var p2d = (Vector2)transform.position;
-        
-        foreach( var m in leftMarks)
-        {
-            sensorLeft += 1.0f;///(m.position - p2d).sqrMagnitude;
-        }
-        foreach( var m in rightMarks)
-        {
-            sensorRight += 1.0f;///(m.position - p2d).sqrMagnitude;
-        }
-        foreach( var m in centerMarks)
-        {
-            sensorCenter += 1.0f;///(m.position - p2d).sqrMagnitude;
-        }        
+        sensorLeft = map.GetMarks(leftSensorPos,sensorRange);
+        sensorRight = map.GetMarks(RightSensorPos,sensorRange);
+        sensorCenter = map.GetMarks(CenterSensorPos,sensorRange);
     }
     Vector2 makeRandomDirection(Vector2 startWith)
     {
@@ -148,7 +135,7 @@ public class Agent : MonoBehaviour
         
         if (food != null) //return to colony
         {
-                food.transform.position = transform.position + transform.right*3.0f;
+                food.transform.position = transform.position + transform.right*12.0f;
                 var colony = Physics2D.OverlapCircle(transform.position, 80,LayerMask.GetMask("colony"));
                 if ( colony != null)
                 {
@@ -161,12 +148,12 @@ public class Agent : MonoBehaviour
         {
             if (food == null)
             {
-                Map.instance.homeMarks.AddMark( transform.position);
+                Map.instance.homeMarks.AddMark( transform.position,traceWeight*Time.fixedDeltaTime);
                 //Instantiate(spawner.searchMark,transform.position, Quaternion.identity);
             }
             else
             {
-                Map.instance.foodMarks.AddMark( transform.position);
+                Map.instance.foodMarks.AddMark( transform.position,traceWeight*Time.fixedDeltaTime);
                 //Instantiate(spawner.foodMark, transform.position, Quaternion.identity);
             }
             nextTimeToAddTrace = traceInterval + nextTimeToAddTrace;
@@ -180,10 +167,12 @@ public class Agent : MonoBehaviour
 
         if (food != null)
         {
-            if ((transform.position - Vector3.zero).magnitude < 50)
+            if ((transform.position - Vector3.zero).magnitude < 50) //return food to colony
             {
                 Destroy(food.gameObject);
                 food = null;
+                targetDirection = -transform.right ;//turnaround 
+                velocity = -transform.right *speed;
             }
         }
 
@@ -192,7 +181,7 @@ public class Agent : MonoBehaviour
             newPos.y <-512 || newPos.y > 512 )
             {
                 newPos = transform.position;
-                targetDirection = (-transform.position).normalized;
+                targetDirection = (targetDirection+Random.insideUnitCircle* 100).normalized ;
                 velocity = targetDirection*speed;
             }        
 
@@ -229,7 +218,7 @@ public class Agent : MonoBehaviour
         {
             food = newFood;
             food.Taken();
-            targetDirection = -transform.right ;
+            targetDirection = -transform.right ;//turnaround 
             velocity = -transform.right *speed;
         }
     }

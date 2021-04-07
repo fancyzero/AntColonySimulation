@@ -331,69 +331,40 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &5038606393188225815
-PrefabInstance:
+--- !u!1 &1063739354 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6877501031184457579, guid: 51933d28e7e3c45428c83f441257a0a4, type: 3}
+  m_PrefabInstance: {fileID: 6877501030374238814}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1063739357
+MonoBehaviour:
   m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -20.242868
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -70.49385
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -94.890396
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675719, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675736, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: markerLife
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 5038606392812675737, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
-      propertyPath: m_Name
-      value: Map
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 05b4c01267f8b9c4795d2fbbcee50368, type: 3}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1063739354}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8fd6be616f270d46b0b99a86d41bcda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerDecaySpeed: 0.1
+  homeMarks:
+    decaySpeed: 0
+    tl: {x: 0, y: 0}
+    rb: {x: 0, y: 0}
+    size: 0
+    texture: {fileID: 0}
+  foodMarks:
+    decaySpeed: 0
+    tl: {x: 0, y: 0}
+    rb: {x: 0, y: 0}
+    size: 0
+    texture: {fileID: 0}
+  mapLeftTop: {x: 0, y: 0}
+  mapRightBottom: {x: 0, y: 0}
 --- !u!1001 &5646031933210208366
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -403,7 +374,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1019545660412470542, guid: 71b4cd9cc3e75634d96cdf902dceeb04, type: 3}
       propertyPath: count
-      value: 1
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: 1019545660412470542, guid: 71b4cd9cc3e75634d96cdf902dceeb04, type: 3}
       propertyPath: angentPerSecond

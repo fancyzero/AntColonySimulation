@@ -1,17 +1,14 @@
-Shader "Unlit/MapShader"
+Shader "Unlit/MarkerShader"
 {
     Properties
     {
-        
-        NumGrids ("Num Grids",float)=0
-        FoodMark ("Food Mark",2D)="Black" {}
-        HomeMark ("Home Mark",2D)="Black" {}
+        _Color ("Color", Color) = (1,1,1,1)
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Transparent" }
         LOD 100
-
+        blend srcAlpha OneMinusSrcAlpha
         Pass
         {
             CGPROGRAM
@@ -35,25 +32,23 @@ Shader "Unlit/MapShader"
                 float4 vertex : SV_POSITION;
             };
 
-            float NumGrids;
-            sampler2D FoodMark;
-            sampler2D HomeMark;
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
+            float4 _Color;
+
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-
-                // apply fog
-                float food = tex2D(FoodMark, i.uv).x;
-                float home = tex2D(HomeMark, i.uv).x;
-                
-                return float4(food,(1-saturate(food+home))*0.5,home,1);
+                // sample the texture
+                return _Color;
             }
             ENDCG
         }

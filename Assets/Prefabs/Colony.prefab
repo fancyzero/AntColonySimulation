@@ -46,10 +46,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentTemplate: {fileID: 1816973198571561074, guid: 1635bae9b727748499c1e0f2995f62ed, type: 3}
-  searchMark: {fileID: 5097378095284461387, guid: 9ee7024dce70f3945ba975b091eef2e7, type: 3}
+  searchMark: {fileID: 3202617019958107884, guid: 1714ee4dfaae0c144b1af9c7ed476ce4, type: 3}
   foodMark: {fileID: 5097378095284461387, guid: 44854c3314ca2fc44b4c3ed0c3acfa33, type: 3}
-  count: 1
-  angentPerSecond: 200
+  count: 200
+  angentPerSecond: 100
 --- !u!212 &1318228205
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -90,7 +90,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2000
   m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   m_Color: {r: 1, g: 0.6541963, b: 0.025157154, a: 1}
   m_FlipX: 0

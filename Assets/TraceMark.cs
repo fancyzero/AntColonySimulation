@@ -13,6 +13,7 @@ public class TraceMark : MonoBehaviour
     float spawnedTime;
     float life;
     public MarkType type;
+    
     // Start is called before the first frame update
     void Awake()
     {
@@ -22,6 +23,8 @@ public class TraceMark : MonoBehaviour
 
     // Update is called once per frame
     private void FixedUpdate() {
+        var c = GetComponentInChildren<SpriteRenderer>().color;
+        GetComponentInChildren<SpriteRenderer>().color =new Color(c.r,c.g,c.b,1.0f-(Time.fixedTime - spawnedTime)/life) ;
         if (Time.fixedTime - spawnedTime > life)
             Destroy(gameObject);
     }
