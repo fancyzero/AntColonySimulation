@@ -97,6 +97,6 @@ void AgentRun (uint3 id : SV_DispatchThreadID)
     }
     agents[id.x].pos = newPos;
     agents[id.x].angle = newAngle;
-    res[int2(newPos.x, newPos.y)] = saturate(trailWeight* deltaTime*saturate(agents[id.x].specie));
+    res[int2(newPos.x, newPos.y)] = (trailWeight* deltaTime*saturate(agents[id.x].specie));
     
 }

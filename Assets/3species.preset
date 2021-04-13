@@ -9,7 +9,8 @@ Preset:
   m_Name: 3species
   m_TargetType:
     m_NativeTypeID: 114
-    m_ManagedTypePPtr: {fileID: 11500000, guid: 972d24c276904244a98caf05280f0401, type: 3}
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 972d24c276904244a98caf05280f0401,
+      type: 3}
     m_ManagedTypeFallback: 
   m_Properties:
   - target: {fileID: 0}
@@ -26,7 +27,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: numAgents
-    value: 10000
+    value: 200000
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: csAgentRun
@@ -54,27 +55,27 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: sensorDist
-    value: 12
+    value: 30
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: sensorRange
-    value: 5
+    value: 10
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: turnSpeed
-    value: 100
+    value: 94.73685
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: trailWeight
-    value: 400
+    value: 354.66666
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: decaySpeed
-    value: 0
+    value: 0.45095888
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: diffuseSpeed
-    value: 93.74999
+    value: 81.25
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: sensorAngle
@@ -90,10 +91,9 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: simulationDeltaTime
-    value: 0.01
+    value: 0.005
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: size
     value: 1024
     objectReference: {fileID: 0}
-  m_ExcludedProperties: []

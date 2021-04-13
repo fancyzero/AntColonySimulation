@@ -71,6 +71,6 @@ void ProcessTraceMap (uint3 id : SV_DispatchThreadID)
     
 //     float4 blured = (final_colour/(Z*Z));    
     float4 diffused = lerp(old, blured, saturate(diffuseSpeed*deltaTime));
-    float4 newValue = max(0, diffused - decaySpeed*deltaTime);
+    float4 newValue = max(0, diffused - diffused*decaySpeed*deltaTime);
     newMap[id.xy] = newValue;
 }

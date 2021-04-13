@@ -13,14 +13,13 @@ public class Agent : MonoBehaviour
     public float traceInterval = 0.2f;
     Vector2 targetDirection ;
     Vector2 velocity;
-    public float speed = 3;
-    public float rotateSpeed=3;
+    public float maxSpeed = 3;
+    public float steeringStrength=3;
     Food food;
     public float sensorAngle;
-    public float sensorDistance;
-    public float sensorRange;
+    public int sensorDistance;
+    public int sensorRange;
 
-    public UnityEngine.UI.Text dbgText;
     float sensorLeft = 0;
     float sensorRight = 0;
     float sensorCenter = 0;
@@ -40,24 +39,31 @@ public class Agent : MonoBehaviour
         Vector2 RightSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(-sensorRad), Mathf.Sin(-sensorRad),0));
         Vector2 CenterSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(0), Mathf.Sin(0),0));
 
-        Gizmos.DrawWireSphere(leftSensorPos, sensorRange);
-        Gizmos.DrawWireSphere(RightSensorPos, sensorRange);
-        Gizmos.DrawWireSphere(CenterSensorPos, sensorRange);
+        var leftSensorRect = Map.instance.GetSenseRect(leftSensorPos, sensorRange);
+        var rightSensorRect = Map.instance.GetSenseRect(RightSensorPos, sensorRange);
+        var forwardSensorRect = Map.instance.GetSenseRect(CenterSensorPos, sensorRange);
+        Gizmos.DrawWireCube((Vector2)leftSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
+        Gizmos.DrawWireCube((Vector2)rightSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
+        Gizmos.DrawWireCube((Vector2)forwardSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
+        
+        Gizmos.DrawLine(transform.position, (Vector3)targetDirection*5+transform.position );
+        Gizmos.DrawLine(transform.position, (Vector3)acceleraton*5+transform.position );
+        
 
     }
 
     void Sense()
     {
         var p = transform.position;
-        // var layerMask = LayerMask.GetMask("foodMark","searchMark");
+        //var layerMask = LayerMask.GetMask("foodMark","searchMark");
 
-        TraceMap map = null;
+        Vector4 mask;
         if (food == null)
         {
-            map = Map.instance.foodMarks;
+            mask = new Vector4(0,1,0,0);
         }   
         else
-            map = Map.instance.homeMarks;
+            mask = new Vector4(1,0,0,0);
 
         var sensorRad = (sensorAngle) / 180 * Mathf.PI;
         
@@ -65,30 +71,13 @@ public class Agent : MonoBehaviour
         Vector2 RightSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(-sensorRad), Mathf.Sin(-sensorRad),0));
         Vector2 CenterSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(0), Mathf.Sin(0),0));
 
-        List<Marker> leftMarks = map.GetMarks(leftSensorPos,sensorRange);
-        List<Marker> rightMarks = map.GetMarks(RightSensorPos,sensorRange);
-        List<Marker> centerMarks = map.GetMarks(CenterSensorPos,sensorRange);
+        sensorLeft = Vector4.Dot(Map.instance.GetPheromone(transform.position, leftSensorPos,sensorRange),mask);
+        sensorRight = Vector4.Dot(Map.instance.GetPheromone(transform.position,RightSensorPos,sensorRange),mask);
+        sensorCenter = Vector4.Dot(Map.instance.GetPheromone(transform.position,CenterSensorPos,sensorRange),mask);
 
 
 
-        sensorLeft = 0;
-        sensorRight = 0;
-        sensorCenter = 0;
-
-        var p2d = (Vector2)transform.position;
-        
-        foreach( var m in leftMarks)
-        {
-            sensorLeft += 1.0f;///(m.position - p2d).sqrMagnitude;
-        }
-        foreach( var m in rightMarks)
-        {
-            sensorRight += 1.0f;///(m.position - p2d).sqrMagnitude;
-        }
-        foreach( var m in centerMarks)
-        {
-            sensorCenter += 1.0f;///(m.position - p2d).sqrMagnitude;
-        }        
+        var p2d = (Vector2)transform.position;    
     }
     Vector2 makeRandomDirection(Vector2 startWith)
     {
@@ -119,7 +108,7 @@ public class Agent : MonoBehaviour
             }
             return 0;
     }
-
+Vector2 acceleraton;
     Quaternion MakeRotation(float angle)
     {
         return Quaternion.Euler(0,0,angle);
@@ -130,10 +119,7 @@ public class Agent : MonoBehaviour
     {
         
         Sense();
-        // if (food != null)
-        //     dbgText.text = string.Format("L:{0} C:{1} R:{2}",sensorLeft,sensorCenter,sensorRight);
-        var steering = PickRotation();
-        
+        var steering = PickRotation();        
 
         if (steering > 0)
             targetDirection = Quaternion.Euler(0,0,sensorAngle)* transform.right;
@@ -148,7 +134,7 @@ public class Agent : MonoBehaviour
         
         if (food != null) //return to colony
         {
-                food.transform.position = transform.position + transform.right*3.0f;
+                food.transform.position = transform.position + transform.right*4.0f;
                 var colony = Physics2D.OverlapCircle(transform.position, 80,LayerMask.GetMask("colony"));
                 if ( colony != null)
                 {
@@ -160,15 +146,9 @@ public class Agent : MonoBehaviour
         if (Time.fixedTime > nextTimeToAddTrace)
         {
             if (food == null)
-            {
-                Map.instance.homeMarks.AddMark( transform.position);
-                //Instantiate(spawner.searchMark,transform.position, Quaternion.identity);
-            }
+                Map.instance.AddPheromone( transform.position, new Vector4(1,0,0,0));
             else
-            {
-                Map.instance.foodMarks.AddMark( transform.position);
-                //Instantiate(spawner.foodMark, transform.position, Quaternion.identity);
-            }
+                Map.instance.AddPheromone( transform.position, new Vector4(0,1,0,0));
             nextTimeToAddTrace = traceInterval + nextTimeToAddTrace;
         }
 
@@ -183,6 +163,9 @@ public class Agent : MonoBehaviour
             if ((transform.position - Vector3.zero).magnitude < 50)
             {
                 Destroy(food.gameObject);
+
+            targetDirection = -transform.right ;
+            velocity = -transform.right *maxSpeed;                
                 food = null;
             }
         }
@@ -193,15 +176,15 @@ public class Agent : MonoBehaviour
             {
                 newPos = transform.position;
                 targetDirection = (-transform.position).normalized;
-                velocity = targetDirection*speed;
+                velocity = targetDirection*maxSpeed;
             }        
 
 
-        Vector2 targetVelocity = targetDirection * speed;
-        Vector2 targetSteeringForce = (targetVelocity - velocity)*rotateSpeed;
-        Vector2 acceleraton = Vector2.ClampMagnitude(targetSteeringForce,rotateSpeed);
+        Vector2 targetVelocity = targetDirection * maxSpeed;
+        Vector2 targetSteeringForce = (targetVelocity - velocity)*steeringStrength;
+        acceleraton = Vector2.ClampMagnitude(targetSteeringForce,steeringStrength);
 
-        velocity = Vector2.ClampMagnitude(velocity+acceleraton*Time.fixedDeltaTime,speed);
+        velocity = Vector2.ClampMagnitude(velocity+acceleraton*Time.fixedDeltaTime,maxSpeed);
 
 
         transform.SetPositionAndRotation(newPos,Quaternion.Euler(0,0,Mathf.Atan2(velocity.y,velocity.x)*Mathf.Rad2Deg));
@@ -230,7 +213,7 @@ public class Agent : MonoBehaviour
             food = newFood;
             food.Taken();
             targetDirection = -transform.right ;
-            velocity = -transform.right *speed;
+            velocity = -transform.right *maxSpeed;
         }
     }
 

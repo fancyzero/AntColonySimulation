@@ -1,4 +1,4 @@
-﻿Shader "Unlit/NewUnlitShader"
+﻿Shader "Unlit/BufferViewer"
 {
     Properties
     {
@@ -7,6 +7,9 @@
         _GradientG ("GradientG", 2D) = "white" {}
         _GradientB ("GradientB", 2D) = "white" {}
         _GradientA ("GradientA", 2D) = "white" {}
+
+        trailMax("Trail Max", range(1,10))=1
+        gradiantCurve("gradientCurve", range(1,5))=1
     }
     SubShader
     {
@@ -42,6 +45,8 @@
             sampler2D _GradientB;            
             sampler2D _GradientA;            
             float4 _MainTex_ST;
+            float trailMax;
+            float gradiantCurve;
 
             v2f vert (appdata v)
             {
@@ -54,13 +59,14 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float4 value = tex2D(_MainTex, i.uv);
+                float4 s = tex2D(_MainTex, i.uv);
+                float4 value = pow(s/trailMax,gradiantCurve);
                 float4 R = tex2D(_GradientR, float2(value.r,0));
                 float4 G = tex2D(_GradientG, float2(value.g,0));
                 float4 B = tex2D(_GradientB, float2(value.b,0));
                 float4 A = tex2D(_GradientA, float2(value.a,0));
-
-                return value;//(R*value.r+G*value.g+B*value.b+A*value.a)/(dot(value,float4(1,1,1,1)));
+                value=normalize(value);
+                return (R*value.r+G*value.g+B*value.b+A*value.a);///(dot(value,float4(1,1,1,1)));
             }
             ENDCG
         }

@@ -59,7 +59,7 @@ public class CSTest : MonoBehaviour
         {
             
             var initialDir = Random.insideUnitCircle;
-            var initialAngle = Mathf.Atan2(-initialDir.y, -initialDir.x);
+            var initialAngle = Mathf.Atan2(initialDir.x, -initialDir.y);
             var specieId = Random.Range(0,species);
             Vector4 specie = new Vector4(0,0,0,0);
             if (specieId == 0)
