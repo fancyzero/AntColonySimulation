@@ -20,6 +20,7 @@ public class Food : MonoBehaviour
         {
             c.enabled = false;
         }
+        GetComponentInChildren<SpriteRenderer>().sortingOrder = 20;
     }
 
 }

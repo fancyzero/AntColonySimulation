@@ -4,6 +4,7 @@
     {
         _MainTex ("Texture", 2D) = "white" {}
         xx ("xx", range(10,100)) = 50
+        showPheromen ("Show Pheromen", float)=1
         // k ("k",float) = 0.4
         // c ("c",float) = 40
     }   
@@ -38,6 +39,7 @@
             float4 _MainTex_ST;
             uniform float4 _MainTex_TexelSize;
             float xx ;
+            float showPheromen;
             // float k;
             // float c;
             v2f vert (appdata v)
@@ -63,8 +65,10 @@
                 xx = 1/(xx*xx*xx*xx);
                 float2 center = (floor(i.uv * _MainTex_TexelSize.zw) + 0.5) * _MainTex_TexelSize.xy;
                 int size = 0;
+                [unroll]
                 for (int x = -size; x <=size; x++)
                 {
+                    [unroll]
                     for (int y = -size; y <=size; y++)
                     {              
                         float2 diff = i.uv - (center + float2(x,y)*_MainTex_TexelSize.xy);
@@ -73,7 +77,7 @@
                     }
                 }
                 
-                return lerp(float4(v.xzy,1), float4(0.4,0.2,0.3,1), 1-saturate(v.x+v.y));
+                return lerp(float4(0.4,0.2,0.3,1),  lerp(float4(v.xzy,1), float4(0.4,0.2,0.3,1), 1-saturate(v.x+v.y)),step(0.5,showPheromen));
             }
             ENDCG
         }

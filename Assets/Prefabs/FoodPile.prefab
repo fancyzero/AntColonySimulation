@@ -45,4 +45,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodTemplate: {fileID: 1642803370634957126, guid: 45645193eb0f7884e8af5db258990785, type: 3}
   radius: 20
-  count: 100
+  count: 60
