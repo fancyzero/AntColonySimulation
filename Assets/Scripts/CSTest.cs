@@ -9,7 +9,6 @@ public struct AgentCS
         pos = p;
         angle = a;
         specie = sp;
-
     }
     public Vector2 pos;
     public  float angle;
@@ -39,6 +38,7 @@ public class CSTest : MonoBehaviour
 
     public int species = 1;
     public float simulationDeltaTime = 0.005f;
+    public Texture2D uibg;
     public int size = 256;
     // Start is called before the first frame update
     void Reset()
@@ -102,16 +102,11 @@ public class CSTest : MonoBehaviour
     void Start()
     {
         Reset();
-
-        
-        
-
-
     }
 
     float SliderUI( float value, float left, float right,string labelName)
     {
-        UnityEngine.GUILayout.BeginHorizontal(GUILayout.MinWidth(400));
+        UnityEngine.GUILayout.BeginHorizontal(GUILayout.MinWidth(200));
         UnityEngine.GUILayout.Label(labelName);
         float ret = UnityEngine.GUILayout.HorizontalSlider(value, left,right);
         UnityEngine.GUILayout.EndHorizontal();
@@ -119,15 +114,19 @@ public class CSTest : MonoBehaviour
     }
     private void OnGUI() {
         
+        GUIStyle style = new GUIStyle();
+        style.normal.background = uibg;
+        GUILayout.BeginArea(new Rect(10, 10, 250, 200),style);
         if (UnityEngine.GUILayout.Button("Reset"))
         {
             Reset();
         }
-        moveSpeed = SliderUI(moveSpeed,0,100,"Move Speed");
-        turnSpeed = SliderUI(turnSpeed,0,100,"Turn Speed");
-        decaySpeed = SliderUI(decaySpeed,0,10,"Decay Speed");
-        diffuseSpeed = SliderUI(diffuseSpeed,0,200,"Diffuse Speed");
-        trailWeight = SliderUI(trailWeight,0,400,"Trail Weight");
+        moveSpeed = SliderUI(moveSpeed,0,100,"Move:");
+        turnSpeed = SliderUI(turnSpeed,0,100,"Turn:");
+        decaySpeed = SliderUI(decaySpeed,0,10,"Decay:");
+        diffuseSpeed = SliderUI(diffuseSpeed,0,200,"Diffuse:");
+        trailWeight = SliderUI(trailWeight,0,400,"Weight");
+        GUILayout.EndArea();
     }
     // Update is called once per frame
     void Update()

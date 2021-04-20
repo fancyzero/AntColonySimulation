@@ -21,6 +21,7 @@ float turnSpeed;
 float trailWeight;
 float sensorAngle;
 float sensorBaseAngle;
+
 uint hash(uint state)
 {
     state ^= 2747636419u;
@@ -32,7 +33,7 @@ uint hash(uint state)
     return state;
 }
 
-float sense(Agent agent, float sensorAngleOffset)
+float Sense(Agent agent, float sensorAngleOffset)
 {
     sensorAngleOffset+=sensorBaseAngle;
     float angle = agent.angle + sensorAngleOffset;
@@ -63,19 +64,15 @@ void AgentRun (uint3 id : SV_DispatchThreadID)
     uint random = hash(agent.pos.y*width + agent.pos.x+hash(id.x));
     float random01 =  (random/4294967295.0f);
     
-    float centerScore =sense(agent,0);
-    float leftScore = sense(agent,-sensorAngle*0.01745);
-    float rightScore = sense(agent,sensorAngle*0.01745);
+    float centerScore =Sense(agent,0);
+    float leftScore = Sense(agent,-sensorAngle*0.01745);
+    float rightScore = Sense(agent,sensorAngle*0.01745);
 
     float randomSteering = random01;
     float newAngle = agent.angle;
     if (centerScore > leftScore && centerScore > rightScore )
     {
         //nothing, keep moving forward
-    }
-    else if (centerScore < leftScore && centerScore < rightScore)
-    {
-        newAngle += (randomSteering-0.5)*2*turnSpeed*deltaTime;
     }
     else if (leftScore > rightScore)
     {

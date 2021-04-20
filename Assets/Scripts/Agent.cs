@@ -41,6 +41,9 @@ public class Agent : MonoBehaviour
 
     public LineRenderer lineNewVelocity;
 
+    public ParticleSystem homeMarkPareticles;
+    public ParticleSystem foodMarkPareticles;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -50,37 +53,33 @@ public class Agent : MonoBehaviour
     private void OnDrawGizmosSelected() 
     {
 
-        // var sensorRad = (sensorAngle) / 180 * Mathf.PI;
+        var sensorRad = (sensorAngle) / 180 * Mathf.PI;
         
-        // Vector2 leftSensorPos = transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(sensorRad), Mathf.Sin(sensorRad),0));
-        // Vector2 RightSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(-sensorRad), Mathf.Sin(-sensorRad),0));
-        // Vector2 CenterSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(0), Mathf.Sin(0),0));
+        Vector2 leftSensorPos = transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(sensorRad), Mathf.Sin(sensorRad),0));
+        Vector2 RightSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(-sensorRad), Mathf.Sin(-sensorRad),0));
+        Vector2 CenterSensorPos= transform.TransformPoint(sensorDistance*new Vector3(Mathf.Cos(0), Mathf.Sin(0),0));
 
-        // var leftSensorRect = Map.instance.GetSenseRect(leftSensorPos, sensorRange);
-        // var rightSensorRect = Map.instance.GetSenseRect(RightSensorPos, sensorRange);
-        // var forwardSensorRect = Map.instance.GetSenseRect(CenterSensorPos, sensorRange);
-        // Gizmos.DrawWireCube((Vector2)leftSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
-        // Gizmos.DrawWireCube((Vector2)rightSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
-        // Gizmos.DrawWireCube((Vector2)forwardSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
-        
-        Gizmos.DrawLine(transform.position, (Vector3)targetDirection*3+transform.position );
-        Gizmos.DrawLine(transform.position, (Vector3)acceleration.normalized*5+transform.position );
+        var leftSensorRect = Map.instance.GetSenseRect(leftSensorPos, sensorRange);
+        var rightSensorRect = Map.instance.GetSenseRect(RightSensorPos, sensorRange);
+        var forwardSensorRect = Map.instance.GetSenseRect(CenterSensorPos, sensorRange);
+
+        Gizmos.DrawCube((Vector2)leftSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
+        Gizmos.DrawCube((Vector2)rightSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
+        Gizmos.DrawCube((Vector2)forwardSensorRect.position*Map.instance.gridSize+Map.instance.tl, new Vector3(sensorRange*2,sensorRange*2,sensorRange*2));
+
         
 
     }
 
     void Sense()
     {
-        var p = transform.position;
-        //var layerMask = LayerMask.GetMask("foodMark","searchMark");
-
         Vector4 mask;
         if (food == null)
         {
-            mask = new Vector4(0,1,0,0);
+            mask = new Vector4(1,0,0,0);
         }   
         else
-            mask = new Vector4(1,0,0,0);
+            mask = new Vector4(0,1,0,0);
 
         var sensorRad = (sensorAngle) / 180 * Mathf.PI;
         
@@ -91,8 +90,6 @@ public class Agent : MonoBehaviour
         sensorLeft = Vector4.Dot(Map.instance.GetPheromone(transform.position, leftSensorPos,sensorRange),mask);
         sensorRight = Vector4.Dot(Map.instance.GetPheromone(transform.position,RightSensorPos,sensorRange),mask);
         sensorCenter = Vector4.Dot(Map.instance.GetPheromone(transform.position,CenterSensorPos,sensorRange),mask);
-
-        var p2d = (Vector2)transform.position;    
     }
     Vector2 makeRandomDirection(Vector2 startWith)
     {
@@ -100,28 +97,16 @@ public class Agent : MonoBehaviour
     }
 
     float PickRotation()
-    {
-            if ( sensorCenter > sensorLeft && sensorCenter > sensorRight )
-            {
-                return 0;
-            }
-
-            else if ( sensorRight > sensorCenter && sensorLeft > sensorCenter )
-            {
-                var ret= Random.Range(0,1);
-                if (ret == 0)
-                    ret = -1;
-                return ret;
-            }       
-            else if (sensorLeft > sensorRight)
-            {
-                return 1;
-            }
-            else if (sensorRight > sensorLeft)
-            {
-                return -1;
-            }
+    { 
+        if ( sensorCenter > sensorLeft && sensorCenter > sensorRight )
             return 0;
+        if ( sensorRight > sensorCenter && sensorLeft > sensorCenter )
+            return sensorLeft > sensorRight? 1: -1;
+        else if (sensorLeft > sensorRight)
+            return 1;
+        else if (sensorRight > sensorLeft)
+            return -1;
+        return 0;            
     }
 Vector2 acceleration;
     Quaternion MakeRotation(float angle)
@@ -152,17 +137,17 @@ Vector2 acceleration;
     }
     void FixedUpdate()
     {
-        // Sense();
-        // var steering = PickRotation();        
+        Sense();
+        var steering = PickRotation();        
 
-        // if (steering > 0)
-        //     targetDirection = Quaternion.Euler(0,0,sensorAngle)* transform.right;
-        // else if (steering < 0 )
-        //     targetDirection =Quaternion.Euler(0,0,-sensorAngle)* transform.right;
-        // // else
-        // //     targetDirection = transform.right;
+        if (steering > 0)
+            targetDirection = Quaternion.Euler(0,0,sensorAngle)* transform.right;
+        else if (steering < 0 )
+            targetDirection =Quaternion.Euler(0,0,-sensorAngle)* transform.right;
+        // else
+        //     targetDirection = transform.right;
 
-        // // add a tiny nudge to the moving direction every frame 
+        // add a tiny nudge to the moving direction every frame 
         // var nudge = Random.insideUnitCircle * wanderingStrength;
         // UpdateDebugLine(lineNudge,transform.position, nudge);
         // UpdateDebugLine(lineVelocity,transform.position, velocity);
@@ -170,63 +155,73 @@ Vector2 acceleration;
         // targetDirection = (targetDirection + nudge).normalized;
         // UpdateDebugLine(lineTarget,transform.position, targetDirection);
         
-        
-        // if (food != null) //return to colony
-        // {
-        //         food.transform.position = transform.position + transform.right*12.0f;
-        //         var colony = Physics2D.OverlapCircle(transform.position, 80,LayerMask.GetMask("colony"));
-        //         if ( colony != null)
-        //         {
-        //             var diff = colony.transform.position - transform.position;
-        //             targetDirection = diff.normalized;
-        //         }
-        // }
-
-        // if (Time.fixedTime > nextTimeToAddTrace)
-        // {
-        //     if (food == null)
-        //         Map.instance.AddPheromone( transform.position, new Vector4(Time.fixedDeltaTime*pheromoneDensity,0,0,0));
-        //     else
-        //         Map.instance.AddPheromone( transform.position, new Vector4(0,Time.fixedDeltaTime*pheromoneDensity,0,0));
-        //     nextTimeToAddTrace = traceInterval + nextTimeToAddTrace;
-        // }
-
-
-
-        
-
-        // if (food != null)
-        // {
-        //     if ((transform.position - Vector3.zero).magnitude < 50)
-        //     {
-        //         Destroy(food.gameObject);
-
-        //     targetDirection = -transform.right ;
-        //     velocity = -transform.right *maxSpeed;                
-        //         food = null;
-        //     }
-        // }
-
-        // var newPos = transform.position + (Vector3)(velocity * Time.fixedDeltaTime);
-        // if (newPos.x <-512 || newPos.x > 512 ||
-        //     newPos.y <-512 || newPos.y > 512 )
-        //     {
-        //         newPos = transform.position;
-        //         targetDirection = (-transform.position).normalized;
-        //         velocity = targetDirection*maxSpeed;
-        //     }
-
         var nudge = Random.insideUnitCircle * wanderingStrength;
-        targetDirection = (targetDirection + nudge).normalized;       
+        targetDirection = (targetDirection + nudge).normalized; 
 
-
-        if ( food == null)
+        if (food == null)
             SearchFood();
-        
-        Vector2 targetVelocity;
 
-        targetVelocity = targetDirection * maxSpeed;
+        if (food != null) //return to colony
+        {
+                food.transform.position = transform.position + transform.right*12.0f;
+                var colony = Physics2D.OverlapCircle(transform.position, 80,LayerMask.GetMask("colony"));
+                if ( colony != null)
+                {
+                    var diff = colony.transform.position - transform.position;
+                    targetDirection = diff.normalized;
+                }
+        }
+
+        // if (food == null )
+        // {
+        //     if (!foodMarkPareticles.isStopped)
+        //         foodMarkPareticles.Stop();
+        //     if (!homeMarkPareticles.isPlaying)
+        //         homeMarkPareticles.Play();
+        // }
+        // else
+        // {
+        //     if (!homeMarkPareticles.isStopped)
+        //         homeMarkPareticles.Stop();
+        //     if (!foodMarkPareticles.isPlaying)
+        //         foodMarkPareticles.Play();
+
+        // }
+
+
+        if (Time.fixedTime > nextTimeToAddTrace)
+        {
+            if (food == null)
+                Map.instance.AddPheromone( transform.position, new Vector4(0,Time.fixedDeltaTime*pheromoneDensity,0,0));
+            else
+                Map.instance.AddPheromone( transform.position, new Vector4(Time.fixedDeltaTime*pheromoneDensity,0,0,0));
+            nextTimeToAddTrace = traceInterval + nextTimeToAddTrace;
+        }     
+
+        if (food != null)
+        {
+            if ((transform.position - Vector3.zero).magnitude < 50)
+            {
+                Destroy(food.gameObject);
+
+            targetDirection = -transform.right ;
+            velocity = -transform.right *maxSpeed;                
+                food = null;
+            }
+        }
+
         var newPos = transform.position + (Vector3)(velocity * Time.fixedDeltaTime);
+        if (newPos.x <-512 || newPos.x > 512 ||
+            newPos.y <-512 || newPos.y > 512 )
+            {
+                newPos = transform.position;
+                targetDirection = (-transform.position).normalized;
+                velocity = targetDirection*maxSpeed;
+            }
+
+
+
+        Vector2 targetVelocity = targetDirection * maxSpeed;
         transform.SetPositionAndRotation(newPos, Quaternion.Euler(0, 0, Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg));
 
 
@@ -245,7 +240,6 @@ Vector2 acceleration;
 
         
     }
-    public float slowDownAngle = 90;
     Food GetClosestFood()
     {
         var food = Physics2D.OverlapCircle(transform.position,foodSearchRadius, LayerMask.GetMask("food"));
@@ -267,7 +261,6 @@ Vector2 acceleration;
             food = newFood;
             food.Taken();
             targetDirection = -transform.right ;
-            //velocity = -transform.right *maxSpeed;
         }
     }
 

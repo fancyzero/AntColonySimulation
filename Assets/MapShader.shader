@@ -73,9 +73,10 @@
                     {              
                         float2 diff = i.uv - (center + float2(x,y)*_MainTex_TexelSize.xy);
                         float density = xx/dot(diff,diff);
-                        v += density* fetch(center + float2(x,y)*_MainTex_TexelSize.xy);
+                        v += xx/dot(diff,diff)*fetch(center + float2(x,y)*_MainTex_TexelSize.xy);
                     }
                 }
+                v = v*saturate(pow(v,4));
                 
                 return lerp(float4(0.4,0.2,0.3,1),  lerp(float4(v.xzy,1), float4(0.4,0.2,0.3,1), 1-saturate(v.x+v.y)),step(0.5,showPheromen));
             }

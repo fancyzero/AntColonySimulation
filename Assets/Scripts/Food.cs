@@ -19,7 +19,10 @@ public class Food : MonoBehaviour
         foreach( var c in cs )
         {
             c.enabled = false;
+        
         }
+        if (GetComponent<FollowCursor>())
+            GetComponent<FollowCursor>().enabled = false;
         GetComponentInChildren<SpriteRenderer>().sortingOrder = 20;
     }
 

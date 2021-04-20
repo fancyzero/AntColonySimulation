@@ -8,7 +8,7 @@
         _GradientB ("GradientB", 2D) = "white" {}
         _GradientA ("GradientA", 2D) = "white" {}
 
-        trailMax("Trail Max", range(1,10))=1
+        trailMax("Trail Max", range(0.01,10))=1
         gradiantCurve("gradientCurve", range(1,5))=1
     }
     SubShader
